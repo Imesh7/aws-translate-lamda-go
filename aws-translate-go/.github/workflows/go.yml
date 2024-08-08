@@ -1,0 +1,51 @@
+name: Go CI
+
+on:
+  push:
+    branches:
+      - '**'  # Run on every branch
+  pull_request:
+    branches:
+      - '**'  # Run on pull requests to any branch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.22.4'  # Set to your desired Go version
+
+      - name: Verify Go installation
+        run: |
+          go version
+          go env
+
+      - name: Cache Go modules
+        id: cache-modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            /go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Install dependencies
+        run: go mod tidy
+
+      - name: Build for Linux ARM64
+        run: |
+          GOOS=linux GOARCH=arm64 go build -tags lambda.norpc -o bootstrap cmd/document/main.go
+
+      - name: Archive build output
+        uses: actions/upload-artifact@v3
+        with:
+          name: bootstrap
+          path: bootstrap
