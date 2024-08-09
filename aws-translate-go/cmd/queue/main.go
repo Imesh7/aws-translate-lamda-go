@@ -175,8 +175,8 @@ func (client *Clients) HttpHandler(w http.ResponseWriter, r *http.Request) {
 
 // read
 func readFile(client *Clients, languageTo string) ([][]string, map[string]string, map[string]int, int, int, error) {
-	buc := "translate-s3-proitzen"
-	key := "input/aws localeasy.csv"
+	buc := os.Getenv("BUCKET")
+	key := os.Getenv("FILE_LOCATION")
 
 	object := s3.GetObjectInput{
 		Bucket: &buc,
